@@ -31,6 +31,154 @@ I need you to **migrate a sophisticated enterprise-grade mortgage lending platfo
 
 ---
 
+## ⚠️ Common Migration Issues & Preventive Measures
+
+### **1. Component Architecture Issues (Critical)**
+**Problem**: Custom components often cause React warnings and errors
+**Solutions**:
+- **Checkbox Component**: Ensure custom checkbox components properly handle both `checked` prop and `onChange` handler
+```typescript
+// Correct implementation
+export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+  onCheckedChange?: (checked: boolean) => void;
+}
+
+const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (onCheckedChange) onCheckedChange(e.target.checked);
+  if (props.onChange) props.onChange(e);
+};
+```
+
+- **Select Component**: Use proper event handlers for native select elements
+```typescript
+// Wrong: onChange={(value) => handler(value)}
+// Correct: onChange={(e) => handler(e.target.value)}
+```
+
+### **2. Image Configuration Issues (Critical)**
+**Problem**: External images fail to load with Next.js Image component
+**Solution**: Configure `next.config.ts` BEFORE implementing image components
+```typescript
+// next.config.ts - Required for external images
+export default {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https', 
+        hostname: 'your-api-domain.com',
+      }
+    ],
+  },
+}
+```
+
+### **3. CORS Configuration Misalignment (Critical)**
+**Problem**: Frontend can't communicate with backend due to port mismatch
+**Solution**: Update backend CORS settings BEFORE starting frontend development
+```csharp
+// Startup.cs - Update CORS for Next.js port
+builder.WithOrigins("http://localhost:3000", "http://localhost:4001")
+```
+**Note**: Angular typically uses port 4200/4001, Next.js uses port 3000
+
+### **4. Navigation State Management Issues**
+**Problem**: Missing navigation on certain pages, incorrect active states
+**Solutions**:
+- Import Navbar component on ALL pages
+- Use proper pathname checking for active navigation states
+- Test navigation between all major sections before proceeding to next features
+
+---
+
+## 🚀 Recommended Development Workflow
+
+### **Phase 0: Pre-Development Setup (NEW CRITICAL PHASE)**
+1. **Verify Backend Startup** - Test copied .NET backend runs correctly on port 5001
+2. **Update CORS Configuration** - Add localhost:3000 to allowed origins immediately
+3. **Create Startup Scripts** - Build automation scripts for running both services
+4. **Test API Endpoints** - Verify key endpoints respond correctly with tools like Postman
+
+### **Essential Development Scripts (Create These First)**
+Create these automation scripts early in development:
+
+#### `start-app.sh`
+```bash
+#!/bin/bash
+# Comprehensive startup script with error handling
+# - Check prerequisites (Node.js, .NET versions)
+# - Kill existing processes on ports 3000 and 5001
+# - Start backend in background
+# - Start frontend in background  
+# - Monitor both services for errors
+# - Provide colored output for status updates
+```
+
+#### `stop-app.sh` 
+```bash
+#!/bin/bash
+# Clean shutdown of both services
+# - Kill processes on ports 3000 and 5001
+# - Cleanup temporary files
+```
+
+#### `status-app.sh`
+```bash
+#!/bin/bash
+# Check if services are running properly
+# - Test port availability
+# - Test API endpoint health
+# - Display service status
+```
+
+**Why This Matters**: Complex applications need reliable startup procedures. Manual startup becomes tedious and error-prone.
+
+### **Component Development Order (Refined Based on Experience)**
+1. **Core UI Components** - Button, Input, Card, Checkbox, Select (test thoroughly)
+2. **Test Each Component** - Ensure no React warnings before proceeding
+3. **Navigation & Layout** - Navbar, layout components, ensure consistency
+4. **Simple Static Pages** - Homepage, login page, basic routes
+5. **Basic Features** - Property search, simple calculators
+6. **Complex Features** - Multi-step forms, advanced calculators, charts
+
+### **Testing Strategy (Learned from Experience)**
+- **Component Testing**: Test each UI component thoroughly for React warnings
+- **Navigation Testing**: Click through every navigation link after each major component
+- **Form Testing**: Test all form inputs, validation, and submission flows  
+- **Image Testing**: Verify all images load properly (test with real URLs early)
+- **API Testing**: Test backend integration before building complex features
+- **Error Scenarios**: Test API failures, network issues, validation errors
+
+---
+
+## 💡 User Experience Improvements (Discovered During Migration)
+
+### **Navigation Simplification**
+Based on actual user testing and feedback:
+- **Remove from Header Navigation**: Market Trends, Loan Application (keep accessible via homepage)
+- **Simplify Navigation**: Focus on Home, Mortgage Tools, Property Search
+- **Consistent Back Navigation**: Ensure every page has proper back/breadcrumb navigation
+- **Mobile Responsiveness**: Test navigation on mobile devices early
+
+### **Contact & Interaction Simplification**  
+Real-world implementation lessons:
+- **Simple Popups**: Use `alert()` for contact information instead of complex modals
+- **Remove Unnecessary Actions**: Schedule Tour, complex contact forms that don't add value
+- **Focus on Core Actions**: View Details, Calculate Mortgage, Contact Agent
+- **Reduce Clicks**: Minimize steps to complete primary user goals
+
+### **Homepage Streamlining**
+Features that proved unnecessary during testing:
+- **Remove Marketing Fluff**: "Why Choose LendPro?", "Ready to Get Started?" sections
+- **Focus on Tools**: Highlight Calculate Mortgage, Search Properties prominently  
+- **Remove Demo Content**: Demo account information, placeholder content
+- **Clear Value Proposition**: Make primary functions immediately obvious
+
+---
+
 ## Critical Feature Analysis (Based on Angular Codebase)
 
 ### **1. Advanced Mortgage Calculator Suite**
@@ -204,13 +352,65 @@ const useLoanApplicationForm = () => {
 <PropertyPriceChart location="Austin,TX" />
 ```
 
-#### **State Management Architecture**
+#### **State Management Architecture (Enhanced with Real-World Patterns)**
 ```typescript
 // Complex state management for financial data
 const MortgageContext = createContext<MortgageState>()
 const PropertyContext = createContext<PropertyState>()  
 const UserContext = createContext<UserState>()
 const AdminContext = createContext<AdminState>()
+
+// Property filtering with proper TypeScript interfaces
+interface PropertyFilters {
+  location: string;
+  minPrice: string;
+  maxPrice: string;
+  bedrooms: string;
+  bathrooms: string;
+  propertyType: string;
+  hasGarage: boolean;
+  hasPool: boolean;
+}
+
+// Proper state update pattern for complex filtering
+const updateFilter = (key: keyof PropertyFilters, value: string | boolean) => {
+  setFilters(prev => ({ ...prev, [key]: value }));
+  setCurrentPage(1); // Reset pagination when filters change
+};
+
+// Favorite properties management
+const [favoriteProperties, setFavoriteProperties] = useState<Set<number>>(new Set());
+const toggleFavorite = (propertyId: number) => {
+  setFavoriteProperties(prev => {
+    const newFavorites = new Set(prev);
+    if (newFavorites.has(propertyId)) {
+      newFavorites.delete(propertyId);
+    } else {
+      newFavorites.add(propertyId);
+    }
+    return newFavorites;
+  });
+};
+```
+
+#### **Critical Component Props & Event Handling (ADDED)**
+```typescript
+// Correct Select component usage patterns
+// Wrong: onChange={(value) => handler(value)}
+// Correct: onChange={(e) => handler(e.target.value)}
+
+// Checkbox component with proper TypeScript
+interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+  onCheckedChange?: (checked: boolean) => void;
+}
+
+// Input component with proper prefix/suffix support
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  prefix?: string;
+  suffix?: string;
+}
 ```
 
 ### **Backend Integration Requirements**
@@ -280,7 +480,30 @@ const AdminContext = createContext<AdminState>()
 
 ---
 
-## Final Success Validation
+## ✅ Final Success Validation (Updated Based on Real Experience)
+
+### **Critical Component Functionality** ✅
+- [ ] **All form inputs work without React warnings** (checkbox, select, input components)
+- [ ] **Select dropdowns show selected values correctly** (not reverting to defaults)
+- [ ] **Checkboxes toggle properly** with visual feedback and proper event handling
+- [ ] **Images load correctly** with proper Next.js configuration for external sources
+- [ ] **Navigation remains consistent** across all pages (navbar imported everywhere)
+- [ ] **Real-time calculations** work without console errors or warnings
+
+### **Backend Integration & CORS** ✅ 
+- [ ] **CORS configured correctly** for Next.js port (3000) from day one
+- [ ] **All API endpoints respond correctly** from copied backend
+- [ ] **Authentication flows work end-to-end** with JWT integration
+- [ ] **Error handling displays user-friendly messages** for API failures
+- [ ] **Backend starts reliably** on port 5001 without issues
+
+### **User Experience & Navigation** ✅
+- [ ] **Simplified navigation** (Market Trends/Loan Application removed from header)
+- [ ] **Contact features are simple** (alert popups instead of complex modals)
+- [ ] **Homepage streamlined** (unnecessary marketing sections removed)
+- [ ] **No demo account information** displayed on login page
+- [ ] **All major user flows tested manually** end-to-end
+- [ ] **Mobile responsiveness** works properly across device sizes
 
 ### **Functional Requirements** ✅
 - [ ] **Mortgage calculator** performs identical calculations to Angular version
@@ -289,26 +512,25 @@ const AdminContext = createContext<AdminState>()
 - [ ] **Multi-step loan application** captures all required information
 - [ ] **User dashboard** displays statistics and manages user data
 - [ ] **Property search** filters and displays results correctly
-- [ ] **Admin features** allow loan and user management
+- [ ] **Property details page** shows images and contact information properly
 - [ ] **Chart visualizations** render financial data accurately
 
 ### **Technical Requirements** ✅
 - [ ] **Next.js 15** with App Router and TypeScript throughout
-- [ ] **Authentication** works seamlessly with existing JWT backend
-- [ ] **API integration** handles all backend endpoints correctly
-- [ ] **Form validation** matches Angular implementation exactly  
-- [ ] **Error handling** provides appropriate user feedback
+- [ ] **Image configuration** set up in next.config.ts for external images
+- [ ] **Component architecture** follows proper React patterns without warnings
+- [ ] **Form validation** works correctly with proper event handling
+- [ ] **Error boundaries** handle API and component errors gracefully
 - [ ] **Performance** meets or exceeds Angular version
-- [ ] **Mobile responsiveness** works across all device sizes
-- [ ] **SEO optimization** improves discoverability
+- [ ] **Development scripts** (start-app.sh, stop-app.sh) work reliably
 
 ### **Business Requirements** ✅  
 - [ ] **Complete isolated project** - both frontend and backend in new project directory
 - [ ] **Zero backend modifications** - .NET Core API copied exactly without changes
 - [ ] **Feature parity** - all Angular functionality preserved in Next.js
 - [ ] **Standalone deployment** - project runs independently from source
-- [ ] **User experience** maintained or improved over Angular version
-- [ ] **Production ready** - deployable enterprise application with setup documentation
+- [ ] **Improved user experience** - simplified and streamlined from Angular version
+- [ ] **Production ready** - deployable enterprise application with comprehensive documentation
 
 ---
 
