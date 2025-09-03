@@ -60,7 +60,7 @@ dotnet run --project MortgagePlatform.API
 
 The API will be available at:
 - HTTP: `http://localhost:5000`
-- HTTPS: `https://localhost:5001`
+- HTTPS: `https://localhost:5003`
 - Swagger UI: `http://localhost:5000/swagger`
 
 ## API Endpoints

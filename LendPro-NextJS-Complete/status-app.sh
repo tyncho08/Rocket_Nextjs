@@ -43,12 +43,12 @@ echo "======================================"
 echo
 
 # Check Backend Status
-print_status "Checking Backend (Port 5001)..."
-if port_in_use 5001; then
-    print_success "✅ Backend service is running on port 5001"
+print_status "Checking Backend (Port 5003)..."
+if port_in_use 5003; then
+    print_success "✅ Backend service is running on port 5003"
     
     # Try to reach the API endpoint
-    HTTP_CODE=$(check_http "http://localhost:5001/api")
+    HTTP_CODE=$(check_http "http://localhost:5003/api")
     if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "404" ]; then
         print_success "✅ Backend API is responding (HTTP $HTTP_CODE)"
     else
@@ -95,8 +95,8 @@ echo
 
 # Summary
 print_status "Service URLs:"
-if port_in_use 5001; then
-    echo "  🔧 Backend API:  http://localhost:5001"
+if port_in_use 5003; then
+    echo "  🔧 Backend API:  http://localhost:5003"
 else
     echo "  ❌ Backend API:  OFFLINE"
 fi

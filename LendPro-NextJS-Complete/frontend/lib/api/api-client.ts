@@ -3,7 +3,7 @@ import { getSession } from 'next-auth/react';
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5003/api',
   headers: {
     'Content-Type': 'application/json'
   },
@@ -51,7 +51,7 @@ apiClient.interceptors.response.use(
 // Server-side API client (for use in server components)
 export const createServerApiClient = (accessToken?: string): AxiosInstance => {
   const serverClient = axios.create({
-    baseURL: process.env.API_URL || 'http://localhost:5001/api',
+    baseURL: process.env.API_URL || 'http://localhost:5003/api',
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken && { Authorization: `Bearer ${accessToken}` })

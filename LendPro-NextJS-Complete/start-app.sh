@@ -98,7 +98,7 @@ else
 fi
 
 # Kill any existing processes on our target ports
-kill_port 5001  # Backend port
+kill_port 5003  # Backend port
 kill_port 3000  # Frontend port
 
 # Start Backend (.NET Core API)
@@ -121,22 +121,22 @@ if [ ! -d "bin" ] || [ ! -d "obj" ]; then
 fi
 
 # Start backend in background
-print_status "Starting backend server on http://localhost:5001..."
-dotnet run --urls="http://localhost:5001" > "$PROJECT_ROOT/backend.log" 2>&1 &
+print_status "Starting backend server on http://localhost:5003..."
+dotnet run --urls="http://localhost:5003" > "$PROJECT_ROOT/backend.log" 2>&1 &
 BACKEND_PID=$!
 
 # Wait for backend to start with better feedback
 print_status "Waiting for backend to start..."
 for i in {1..30}; do
-    if port_in_use 5001; then
+    if port_in_use 5003; then
         # Additional check - try to reach the API
-        if curl -s -o /dev/null -w "%{http_code}" --connect-timeout 2 "http://localhost:5001/api" >/dev/null 2>&1; then
+        if curl -s -o /dev/null -w "%{http_code}" --connect-timeout 2 "http://localhost:5003/api" >/dev/null 2>&1; then
             break
         fi
     fi
     sleep 2
     if [ $i -eq 30 ]; then
-        print_error "Backend failed to start on port 5001"
+        print_error "Backend failed to start on port 5003"
         print_error "Backend log content:"
         echo "===================="
         tail -20 "$PROJECT_ROOT/backend.log"
@@ -147,7 +147,7 @@ for i in {1..30}; do
     echo -n "."
 done
 
-print_success "Backend started successfully on http://localhost:5001"
+print_success "Backend started successfully on http://localhost:5003"
 
 # Start Frontend (Next.js)
 print_status "Starting Next.js Frontend..."
@@ -174,7 +174,7 @@ if [ ! -f ".env.local" ]; then
     cat > .env.local << EOF
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your-secret-key-here-change-in-production
-NEXT_PUBLIC_API_URL=http://localhost:5001/api
+NEXT_PUBLIC_API_URL=http://localhost:5003/api
 EOF
     print_success "Created .env.local with default configuration"
 fi
@@ -206,7 +206,7 @@ echo "======================================"
 print_success "🚀 LendPro Application Started!"
 echo "======================================"
 echo
-print_status "Backend API:  http://localhost:5001"
+print_status "Backend API:  http://localhost:5003"
 print_status "Frontend App: http://localhost:3000"
 echo
 print_status "Demo Accounts:"

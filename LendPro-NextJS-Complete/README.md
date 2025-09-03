@@ -150,7 +150,7 @@ The startup script will automatically:
 - ✅ Check all prerequisites
 - ✅ Install dependencies if needed
 - ✅ Create environment files with defaults
-- ✅ Start backend on `http://localhost:5001`
+- ✅ Start backend on `http://localhost:5003`
 - ✅ Start frontend on `http://localhost:3000`
 - ✅ Display demo account credentials
 - ✅ Monitor services and provide logs
@@ -204,7 +204,7 @@ If you prefer to start services manually:
 
 3. **Start the backend**
    ```bash
-   dotnet run --urls="http://localhost:5001"
+   dotnet run --urls="http://localhost:5003"
    ```
 
 #### Frontend Setup
@@ -224,7 +224,7 @@ If you prefer to start services manually:
    ```env
    NEXTAUTH_URL=http://localhost:3000
    NEXTAUTH_SECRET=your-secret-key-here-change-in-production
-   NEXT_PUBLIC_API_URL=http://localhost:5001/api
+   NEXT_PUBLIC_API_URL=http://localhost:5003/api
    ```
 
 4. **Start the frontend**

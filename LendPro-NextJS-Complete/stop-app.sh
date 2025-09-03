@@ -50,9 +50,9 @@ kill_port() {
 
 print_status "Stopping LendPro Application..."
 
-# Stop backend (port 5001)
+# Stop backend (port 5003)
 print_status "Stopping backend services..."
-kill_port 5001
+kill_port 5003
 
 # Stop frontend (port 3000)
 print_status "Stopping frontend services..."
